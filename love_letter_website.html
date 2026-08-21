@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Floating hearts & particles */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            color: rgba(255, 105, 180, 0.25);
+            font-size: 18px;
+            animation: floatUp 10s infinite ease-in;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-120px) rotate(720deg); opacity: 0; }
+        }
+
+        /* Envelope */
+        .envelope-wrapper {
+            position: relative;
+            z-index: 10;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+            animation: gentleFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .envelope-wrapper:hover {
+            transform: scale(1.08);
+        }
+
+        .envelope {
+            width: 320px;
+            height: 220px;
+            position: relative;
+            background: #8B0000;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        .envelope::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-top: 130px solid #A52A2A;
+            transform-origin: top;
+            transition: transform 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 3;
+        }
+
+        .envelope.open::before {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .envelope::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 160px solid #700000;
+            border-right: 160px solid #700000;
+            border-bottom: 110px solid transparent;
+            z-index: 2;
+        }
+
+        .env-left {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 160px solid #600000;
+            border-top: 110px solid transparent;
+            border-bottom: 110px solid transparent;
+            z-index: 2;
+        }
+
+        .env-right {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-right: 160px solid #600000;
+            border-top: 110px solid transparent;
+            border-bottom: 110px solid transparent;
+            z-index: 2;
+        }
+
+        .letter-peek {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            right: 20px;
+            height: 190px;
+            background: linear-gradient(135deg, #fff8f8, #ffeaea);
+            border-radius: 6px;
+            z-index: 1;
+            transition: transform 0.9s ease 0.4s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+        }
+
+        .envelope.open .letter-peek {
+            transform: translateY(-100px);
+        }
+
+        .wax-seal {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 55px;
+            height: 55px;
+            background: radial-gradient(circle, #ff4757, #c41e3a);
+            border-radius: 50%;
+            z-index: 4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            animation: sealPulse 2s infinite;
+        }
+
+        @keyframes sealPulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(196, 30, 58, 0.4); }
+            50% { box-shadow: 0 4px 30px rgba(196, 30, 58, 0.8); }
+        }
+
+        .tap-text {
+            text-align: center;
+            color: #ffd700;
+            margin-top: 35px;
+            font-size: 20px;
+            font-weight: 300;
+            text-shadow: 0 2px 15px rgba(0,0,0,0.4);
+            animation: glowText 2s infinite;
+        }
+
+        @keyframes glowText {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Are You OK Section */
+        .ask-section {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            z-index: 10;
+            animation: popIn 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.3); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .ask-title {
+            color: #fff;
+            font-size: 42px;
+            font-weight: 700;
+            text-align: center;
+            text-shadow: 0 3px 20px rgba(0,0,0,0.4);
+            animation: titleBounce 1s ease infinite;
+        }
+
+        @keyframes titleBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .ask-buttons {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .magic-btn {
+            padding: 18px 55px;
+            font-size: 24px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-yes {
+            background: linear-gradient(135deg, #00d2d3, #01a3a4);
+            color: white;
+        }
+
+        .btn-yes:hover {
+            transform: scale(1.15) rotate(-3deg);
+            box-shadow: 0 12px 35px rgba(0, 210, 211, 0.5);
+        }
+
+        .btn-no {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            font-size: 28px;
+            padding: 20px 60px;
+        }
+
+        .btn-no:hover {
+            transform: scale(1.08);
+        }
+
+        /* Response messages */
+        .response-msg {
+            display: none;
+            color: #ffd93d;
+            font-size: 26px;
+            font-weight: 600;
+            text-align: center;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            animation: slideDown 0.5s ease;
+            min-height: 40px;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Explosion */
+        .blast-zone {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+
+        .blast-particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: blastOut 1.8s ease-out forwards;
+        }
+
+        @keyframes blastOut {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--bx), var(--by)) scale(0) rotate(360deg); opacity: 0; }
+        }
+
+        /* Letter Section */
+        .letter-reveal {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+            max-width: 750px;
+            width: 92%;
+            animation: fadeInUp 1.2s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(60px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .paper {
+            background: linear-gradient(135deg, #fff9f9, #fff0f0);
+            padding: 45px;
+            border-radius: 18px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+            position: relative;
+            transform: rotate(-0.5deg);
+            border: 1px solid rgba(196, 30, 58, 0.15);
+        }
+
+        .paper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50px;
+            right: 50px;
+            height: 100%;
+            background: repeating-linear-gradient(
+                transparent,
+                transparent 33px,
+                #ffcdd2 33px,
+                #ffcdd2 34px
+            );
+            pointer-events: none;
+            opacity: 0.25;
+        }
+
+        .paper-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 48px;
+            color: #c41e3a;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .paper-body {
+            font-size: 19px;
+            line-height: 2.4;
+            color: #3d1a5c;
+            text-align: justify;
+            position: relative;
+            z-index: 1;
+        }
+
+        .paper-body p {
+            margin-bottom: 18px;
+            text-indent: 35px;
+        }
+
+        .paper-sign {
+            text-align: right;
+            margin-top: 35px;
+            font-family: 'Dancing Script', cursive;
+            font-size: 32px;
+            color: #c41e3a;
+        }
+
+        /* Sparkles */
+        .sparkle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: #fff;
+            border-radius: 50%;
+            animation: sparkleFly 1s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes sparkleFly {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(1) translate(var(--sx), var(--sy)); opacity: 0; }
+        }
+
+        /* Final Heart */
+        .heart-finale {
+            display: none;
+            z-index: 10;
+            text-align: center;
+            animation: fadeIn 1.5s ease;
+        }
+
+        .heart-finale .big-heart {
+            font-size: 80px;
+            animation: heartbeat 1.2s infinite;
+            display: inline-block;
+            filter: drop-shadow(0 0 20px rgba(255, 0, 0, 0.5));
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            14% { transform: scale(1.4); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.4); }
+        }
+
+        .heart-finale .finale-text {
+            color: #fff;
+            font-size: 28px;
+            margin-top: 20px;
+            font-weight: 300;
+            text-shadow: 0 2px 15px rgba(0,0,0,0.3);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .envelope { width: 260px; height: 180px; }
+            .envelope::before { border-left: 130px solid transparent; border-right: 130px solid transparent; border-top: 105px solid #A52A2A; }
+            .envelope::after { border-left: 130px solid #700000; border-right: 130px solid #700000; border-bottom: 90px solid transparent; }
+            .env-left { border-left: 130px solid #600000; border-top: 90px solid transparent; border-bottom: 90px solid transparent; }
+            .env-right { border-right: 130px solid #600000; border-top: 90px solid transparent; border-bottom: 90px solid transparent; }
+            .paper { padding: 25px; }
+            .paper-title { font-size: 34px; }
+            .paper-body { font-size: 16px; }
+            .ask-title { font-size: 30px; }
+            .magic-btn { padding: 14px 40px; font-size: 20px; }
+            .btn-no { font-size: 24px; padding: 16px 45px; }
+            .response-msg { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Particles -->
+    <div class="particles-container" id="particlesContainer"></div>
+
+    <!-- Blast Zone -->
+    <div class="blast-zone" id="blastZone"></div>
+
+    <!-- Background Music (Auto-play) -->
+    <!-- Replace YOUR_AUDIO_URL_HERE with your audio file URL -->
+    <audio id="bgMusic" src="music.mp3" loop autoplay></audio>
+
+    <!-- Envelope -->
+    <div class="envelope-wrapper" id="envelopeWrapper">
+        <div class="envelope" id="envelope">
+            <div class="env-left"></div>
+            <div class="env-right"></div>
+            <div class="letter-peek">💌</div>
+            <div class="wax-seal">❤️</div>
+        </div>
+        <div class="tap-text">Tap to Open the Letter</div>
+    </div>
+
+    <!-- Are You OK Section -->
+    <div class="ask-section" id="askSection">
+        <div class="ask-title">Are you OK? 💕</div>
+        <div class="ask-buttons">
+            <button class="magic-btn btn-yes" id="yesBtn" onclick="handleYes()">Yes ❤️</button>
+            <button class="magic-btn btn-no" id="noBtn" onclick="handleNo()">No 💔</button>
+        </div>
+        <div class="response-msg" id="responseMsg"></div>
+    </div>
+
+    <!-- Letter Section -->
+    <div class="letter-reveal" id="letterReveal">
+        <div class="paper">
+            <div class="paper-title">My Dearest...</div>
+            <div class="paper-body">
+                <p>నిన్ను చూసిన రోజు నేను రెండోసారి పుట్టిన రోజు. ఎందుకంటే ఆ రోజు నుంచి నాకు నేనే కొత్త ఉన్నాను.</p>
+
+                <p>నువ్వు నా జీవితంలోకి రాక ముందు ఒక జీవితం, నువ్వు వచ్చాక ఒక జీవితం.</p>
+
+                <p>నువ్వు రాక ముందు చెప్పుకోవడానికి ఏమీ లేదు. నువ్వు వచ్చాక ప్రతి రోజు, ప్రతి నిమిషం ఒక అద్భుతంలా అనిపిస్తుంది.</p>
+
+                <p>ఇది వరకు నేను గొప్పవాడిని అయ్యి పోవాలి అని, ఎక్కడో ఎక్కడికో వెళ్లి పోవాలి అనుకునే వాడిని. కానీ ఇప్పుడు నీతో పాటు నీ చేయి పట్టుకొని నడిస్తే చాలు అనిపిస్తుంది.</p>
+
+                <p>ఇష్టపడ్డ లా కోసం యుద్ధాలు జరిగాయి అంటే నవ్వుకునే వాడిని. ఇప్పుడు నీ కోసం ఎన్ని యుద్ధాలైనా చేయవచ్చు అనిపిస్తుంది. ఆ యుద్ధాలు చేసినా అది తక్కువే అనిపిస్తుంది.</p>
+
+                <p>ఫ్యూచర్‌లో నీకు ఎంత చేస్తానో తెలియదు కానీ, నిన్ను సంతోషపెట్టడానికి ప్రతి రోజు, ప్రతి నిమిషం, ప్రతి శణం ప్రయత్నిస్తూనే ఉంటాను.</p>
+
+                <p>నీ వెనక ఉండి నడిపిస్తాను, నీ ముందు ఉండి కష్టాల నీ అడ్డుకుంటాను. నిన్ను అమ్మలా చూసుకుంటాను.</p>
+
+                <p>నిన్ను గెలవాలంటే ఎన్ని జీవితాలు కావాలో తెలియదు కానీ, నీ కోసం ఎంత దూరమైనా నడుస్తాను. ఎన్ని సముద్రాలైనా ఏదుర్తాను. ఎన్ని ఆకాశాలైనా దాటుతా.</p>
+
+                <p>ఎందుకంటే నువ్వు నా జీవితం. నువ్వు లేని నన్ను ఊహించలేను.</p>
+
+                <p>మావు లాగా ఒక అమ్మాయిని ఇంప్రెస్ చేయడం కష్టం. అందులో నిన్ను... నీ మనసులో ఒక చిన్న చోటు సంపాదించుకోవడమే నా జీవితంలోనే అతి పెద్ద గెలుపు.</p>
+
+                <p>ఈ లేఖ నా జీవితం. రెండు నీ చేతుల్లోనే ఉన్నాయి. ఏం చేస్తావో నీ ఇష్టం.</p>
+            </div>
+            <div class="paper-sign">Forever Yours... ❤️</div>
+        </div>
+    </div>
+
+    <!-- Finale -->
+    <div class="heart-finale" id="heartFinale">
+        <div class="big-heart">❤️</div>
+        <div class="finale-text">You are my everything</div>
+    </div>
+
+    <script>
+        // Background particles
+        function spawnParticles() {
+            const container = document.getElementById('particlesContainer');
+            const symbols = ['❤️', '💖', '💕', '💗', '💓', '💝', '✨', '⭐'];
+
+            for (let i = 0; i < 35; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                p.style.left = Math.random() * 100 + '%';
+                p.style.fontSize = (Math.random() * 22 + 12) + 'px';
+                p.style.animationDelay = Math.random() * 10 + 's';
+                p.style.animationDuration = (Math.random() * 6 + 7) + 's';
+                container.appendChild(p);
+            }
+        }
+        spawnParticles();
+
+        // Try autoplay background music
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.volume = 0.4;
+        document.addEventListener('click', () => {
+            if (bgMusic.paused && bgMusic.src && !bgMusic.src.includes('YOUR_AUDIO_URL_HERE')) {
+                bgMusic.play().catch(() => {});
+            }
+        }, { once: true });
+
+        // Envelope open
+        let opened = false;
+        document.getElementById('envelopeWrapper').addEventListener('click', function() {
+            if (opened) return;
+            opened = true;
+
+            const env = document.getElementById('envelope');
+            env.classList.add('open');
+
+            setTimeout(() => {
+                document.getElementById('envelopeWrapper').style.display = 'none';
+                document.getElementById('askSection').style.display = 'flex';
+            }, 1300);
+        });
+
+        // Yes/No logic
+        let yesCount = 0;
+        const yesBtn = document.getElementById('yesBtn');
+        const noBtn = document.getElementById('noBtn');
+        const responseMsg = document.getElementById('responseMsg');
+
+        function handleYes() {
+            yesCount++;
+            createSparkles(yesBtn);
+
+            if (yesCount === 1) {
+                responseMsg.style.display = 'block';
+                responseMsg.textContent = 'Really you fine bujji? 😊';
+                responseMsg.style.color = '#00d2d3';
+            } else if (yesCount === 2) {
+                responseMsg.textContent = 'Aww, that\'s so sweet! 💕';
+                responseMsg.style.color = '#ffd93d';
+            } else if (yesCount === 3) {
+                responseMsg.textContent = 'One more time... No button is getting bigger! 😱';
+                responseMsg.style.color = '#ff6b6b';
+            } else if (yesCount >= 4) {
+                responseMsg.textContent = 'BOOM! Here it comes! 💥';
+                responseMsg.style.color = '#ff4757';
+                setTimeout(() => explodeNoButton(), 600);
+                return;
+            }
+
+            // Grow No button
+            const scale = 1 + (yesCount * 0.5);
+            noBtn.style.transform = `scale(${scale})`;
+            noBtn.style.fontSize = (28 + yesCount * 5) + 'px';
+            noBtn.style.padding = `${20 + yesCount * 6}px ${60 + yesCount * 12}px`;
+        }
+
+        function handleNo() {
+            responseMsg.style.display = 'block';
+            const msgs = [
+                'Please click on Yes! 🥺',
+                'Come on, click Yes! 😢',
+                'I know you want to click Yes! 😤',
+                'Just say Yes! 💔',
+                'The Yes button is waiting for you! ✨'
+            ];
+            responseMsg.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+            responseMsg.style.color = '#ff6b6b';
+
+            // Shake No button
+            noBtn.style.animation = 'shake 0.4s ease';
+            setTimeout(() => noBtn.style.animation = '', 400);
+        }
+
+        function createSparkles(element) {
+            const rect = element.getBoundingClientRect();
+            for (let i = 0; i < 12; i++) {
+                const s = document.createElement('div');
+                s.className = 'sparkle';
+                s.style.left = (rect.left + rect.width / 2) + 'px';
+                s.style.top = (rect.top + rect.height / 2) + 'px';
+                s.style.setProperty('--sx', (Math.random() * 120 - 60) + 'px');
+                s.style.setProperty('--sy', (Math.random() * 120 - 60) + 'px');
+                document.body.appendChild(s);
+                setTimeout(() => s.remove(), 1000);
+            }
+        }
+
+        function explodeNoButton() {
+            const rect = noBtn.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+
+            const zone = document.getElementById('blastZone');
+            zone.style.display = 'block';
+
+            const colors = ['#ff4757', '#ffa502', '#ff6b81', '#ffd93d', '#ff6348', '#ff9ff3', '#f368e0'];
+
+            for (let i = 0; i < 60; i++) {
+                const part = document.createElement('div');
+                part.className = 'blast-particle';
+                part.style.left = cx + 'px';
+                part.style.top = cy + 'px';
+                part.style.background = colors[Math.floor(Math.random() * colors.length)];
+                part.style.width = (Math.random() * 18 + 6) + 'px';
+                part.style.height = part.style.width;
+
+                const angle = (Math.PI * 2 * i) / 60 + (Math.random() - 0.5);
+                const dist = Math.random() * 350 + 120;
+                part.style.setProperty('--bx', Math.cos(angle) * dist + 'px');
+                part.style.setProperty('--by', Math.sin(angle) * dist + 'px');
+
+                zone.appendChild(part);
+            }
+
+            noBtn.style.display = 'none';
+            yesBtn.style.display = 'none';
+            responseMsg.textContent = 'No button blasted away! 🎉';
+            responseMsg.style.color = '#00d2d3';
+
+            setTimeout(() => {
+                document.getElementById('askSection').style.display = 'none';
+                document.getElementById('letterReveal').style.display = 'flex';
+                zone.innerHTML = '';
+                zone.style.display = 'none';
+
+                // Typewriter effect
+                const paras = document.querySelectorAll('.paper-body p');
+                paras.forEach((p, idx) => {
+                    const txt = p.textContent;
+                    p.textContent = '';
+                    p.style.opacity = '0';
+                    setTimeout(() => {
+                        p.style.opacity = '1';
+                        typeIt(p, txt, 0);
+                    }, idx * 1200);
+                });
+
+                // Show finale
+                setTimeout(() => {
+                    document.getElementById('heartFinale').style.display = 'block';
+                }, paras.length * 1200 + 4000);
+            }, 2200);
+        }
+
+        function typeIt(el, text, i) {
+            if (i < text.length) {
+                el.textContent += text.charAt(i);
+                setTimeout(() => typeIt(el, text, i + 1), 25);
+            }
+        }
+    </script>
+</body>
+</html>
